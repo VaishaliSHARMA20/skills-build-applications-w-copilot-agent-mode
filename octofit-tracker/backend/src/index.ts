@@ -1,5 +1,5 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import { connectDatabase } from './database.js';
 import usersRouter from './routes/users.js';
 import teamsRouter from './routes/teams.js';
 import activitiesRouter from './routes/activities.js';
@@ -8,7 +8,6 @@ import workoutsRouter from './routes/workouts.js';
 
 const app = express();
 const port = 8000;
-const mongoUri = 'mongodb://127.0.0.1:27017/octofit_db';
 const codespaceHost = process.env.CODESPACE_NAME
   ? `${process.env.CODESPACE_NAME}-8000.githubpreview.dev`
   : 'localhost';
@@ -24,10 +23,9 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', apiBaseUrl: `https://${codespaceHost}` });
 });
 
-mongoose
-  .connect(mongoUri)
+connectDatabase()
   .then(() => {
-    console.log('Connected to MongoDB at', mongoUri);
+    console.log('Connected to MongoDB at', process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/octofit_db');
     app.listen(port, () => {
       console.log(`Backend running on http://localhost:${port}`);
       if (process.env.CODESPACE_NAME) {
